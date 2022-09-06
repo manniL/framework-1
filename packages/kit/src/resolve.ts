@@ -99,6 +99,12 @@ export async function findPath (paths: string|string[], opts?: ResolvePathOption
   return null
 }
 
+function sanitizeAlias (alias?: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(alias ?? {}).filter(([, value]) => value)
+  ) as Record<string, string>
+}
+
 /**
  * Resolve path aliases respecting Nuxt alias options
  */
@@ -106,6 +112,9 @@ export function resolveAlias (path: string, alias?: Record<string, string>): str
   if (!alias) {
     alias = tryUseNuxt()?.options.alias || {}
   }
+
+  alias = sanitizeAlias(alias)
+
   for (const key in normalizeAliases(alias)) {
     if (key === '@' && !path.startsWith('@/')) { continue } // Don't resolve @foo/bar
     if (path.startsWith(key)) {
